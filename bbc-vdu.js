@@ -3,6 +3,8 @@ export class BeebVDU {
   constructor(params){
     params = params || {elementId: null, globals: true, scale: 1};
 
+    this.vdu_version = "Based on OS 1.20 (1982)";
+
     let elementId = params.id       || null;
     let globals   = params.globals  || false;
     let scale     = params.scale    || 1;
@@ -11,15 +13,17 @@ export class BeebVDU {
 
     this.graphicsCursor = [[0,0],[0,0],[0,0],[0,0]];
     this.textCursor = [0,0];
-    this.textForeground = "#ffffff";
-    this.textBackground = "#000000";
+    this.graphicsForeground = [255, 255, 255];
+    this.textForeground = [255,255,255];
+    this.textBackground = [0,0,0];
 
     this._addCanvas(elementId,scale);
     this._setMode(1);
+    this._startMessage();
 
     if (globals) {this._globals()}
 
-    this.animationCallback = {};
+    this.animationCallback = function(){};
     window.requestAnimationFrame(this._updateFrame.bind(this));
   }
 
@@ -33,10 +37,12 @@ export class BeebVDU {
     window.GCOL = this.gcol.bind(this);
     window.CLS = this.cls.bind(this);
     window.POINT = this.point.bind(this);
+    window.ANIMATION = this.animate.bind(this);
   }
 
   _addCanvas(elementId,scale){
     this.canvas = document.createElement('canvas');
+    this.canvas.id = "canvas";
     if (elementId != null) {
       document.getElementById(elementId).appendChild(this.canvas);
     } else {
@@ -47,7 +53,6 @@ export class BeebVDU {
     this.ctx.imageSmoothingEnabled = false
     this.canvas.style.width = 640*scale;
     this.canvas.style.height = 512*scale;
-
   }
 
   _setMode(n){
@@ -66,11 +71,11 @@ export class BeebVDU {
     if (this.graphicsCursor.length>4) this.graphicsCursor.pop();
   }
 
-  _pixel(x,y){
+  _pixel(x,y,c){
     let offset = (x+y*this.canvas.width)*4
-    this.frame.data[offset]   = this.red;
-    this.frame.data[offset+1] = this.green;
-    this.frame.data[offset+2] = this.blue;
+    this.frame.data[offset]   = c[0];
+    this.frame.data[offset+1] = c[1];
+    this.frame.data[offset+2] = c[2];
     this.frame.data[offset+3] = 0xff; // alpha
   }
 
@@ -80,11 +85,10 @@ export class BeebVDU {
       let byte = this.characterSet[charPointer+y];
       for (let x=0; x<8; x++){
         if (byte & 1 == 1) {
-          this.ctx.fillStyle = this.textForeground;
+          this._pixel(ox+8-x,oy+y,this.textForeground);
         } else {
-          this.ctx.fillStyle = this.textBackground;
+          this._pixel(ox+8-x,oy+y,this.textBackground);
         }
-        this._pixel(ox+8-x,oy+y)
         byte >>= 1;
       }
     }
@@ -94,18 +98,18 @@ export class BeebVDU {
     let [x2,y2] = this.graphicsCursor[0];
     let [x1,y1] = this.graphicsCursor[1];
     x1 |= 0; y1 |= 0; x2 |= 0; y2 |= 0;
-    var dx = x2 - x1, dy = y2 - y1;
-    var sx = (dx > 0) - (dx < 0), sy = (dy > 0) - (dy < 0);
+    let dx = x2 - x1, dy = y2 - y1;
+    let sx = (dx > 0) - (dx < 0), sy = (dy > 0) - (dy < 0);
     dx *= sx; dy *= sy;
-    this._pixel(x1, y1);
+    this._pixel(x1, y1, this.graphicsForeground);
     if( !(dx || dy) )return;
-    var d = 0, x = x1, y = y1, v;
+    let d = 0, x = x1, y = y1, v;
     if(dy < dx)
     for(v = 0 | (dy << 15) / dx * sy; x ^ x2; x += sx, d &= 32767)
-    this._pixel(x, y += (d += v) >> 15);
+    this._pixel(x, y += (d += v) >> 15, this.graphicsForeground);
     else
     for(v = 0 | (dx << 15) / dy * sx; y ^ y2; y += sy, d &= 32767)
-    this._pixel(x += (d += v) >> 15, y);
+    this._pixel(x += (d += v) >> 15, y, this.graphicsForeground);
   };
 
   _updateFrame(){
@@ -114,11 +118,21 @@ export class BeebVDU {
     window.requestAnimationFrame(this._updateFrame.bind(this));
   }
 
+  _startMessage(){
+    this.printtab(1,2,"BBC Micro VDU");
+    this.printtab(1,4,"JavaScript library");
+    this.printtab(1,6,this.vdu_version);
+    this.printtab(1,8,">"); // both BBC BASIC and JavaScript have a chevron prompt, how about that?
+  }
+
+  animate(f){
+    this.animationCallback = f;
+  }
 
   // Public methods
   print(s){
     let [tx,ty] = this.textCursor;
-    for (var i = 0; i < s.length; i++) {
+    for (let i = 0; i < s.length; i++) {
       this._plotChar(s[i],tx*8,ty*8)
       tx+=1;
     }
@@ -146,9 +160,10 @@ export class BeebVDU {
   }
 
   gcol(i,j){
-    this.red   = (j & 1) ? 255 : 0;
-    this.green = (j & 2) ? 255 : 0;
-    this.blue  = (j & 4) ? 255 : 0;
+    let red   = (j & 1) ? 255 : 0;
+    let green = (j & 2) ? 255 : 0;
+    let blue  = (j & 4) ? 255 : 0;
+    this.graphicsForeground = [ red, green, blue];
   }
 
   printtab(tx,ty,s){
@@ -162,11 +177,8 @@ export class BeebVDU {
 
   point(x,y){
     this._pushGraphicsCursor(x,y);
-    this._pixel(this.graphicsCursor[0][0],this.graphicsCursor[0][1])
+    this._pixel(this.graphicsCursor[0][0],this.graphicsCursor[0][1],this.graphicsForeground)
   }
-
-
-
 }
 
 export default BeebVDU;
