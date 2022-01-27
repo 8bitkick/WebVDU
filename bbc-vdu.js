@@ -67,7 +67,7 @@ class BeebVDU {
     window.PRINTTAB = this.printtab.bind(this);
     window.DRAW = this.draw.bind(this);
     window.MOVE = this.move.bind(this);
-    window.MODE = this._setMode.bind(this);
+    window.MODE = this.mode.bind(this);
     window.RND = this.rnd.bind(this);
     window.GCOL = this.gcol.bind(this);
     window.CLS = this.cls.bind(this);
