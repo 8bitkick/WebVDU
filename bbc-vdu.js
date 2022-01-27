@@ -1,7 +1,7 @@
 
 class BeebVDU {
   constructor(params){
-    params = params || {id: null, globals: true, scale: 1};
+    params = params || {id: null, globals: true, scale: 1}; // defaults
 
     this.vdu_version = "Based on OS 1.20 (1982)";
 
@@ -14,10 +14,11 @@ class BeebVDU {
     this.graphicsCursor     = new Uint16Array(2);
     this.graphicsCursorPtr  = 0;
     this.textCursor         = [0,0];
-    this.graphicsForeground = 1;
+    this.graphicsForeground = 0xffffffff;
     this.textForeground     = 0xffffffff;
     this.textBackground     = 0xff000000;
     this.paletteLUT         = new Uint32Array(256);
+    this.currentMode        = 1;
     this.modes              = [
       {
         mode:     0,
@@ -36,11 +37,23 @@ class BeebVDU {
         width:    160,
         height:   256,
         palette:  [0xFF000000,0xFF0000FF,0xFF00FF00,0xFF00FFFF,0xFFFF0000,0xFFFF00FF,0xFFFFFF00,0xFFFFFFFF]
+      },
+      {
+        mode:     4,
+        width:    640,
+        height:   512,
+        palette:  [0xFF000000,0xFF0000FF,0xFF00FF00,0xFF00FFFF,0xFFFF0000,0xFFFF00FF,0xFFFFFF00,0xFFFFFFFF]
+      },
+      {
+        mode:     3,
+        width:    1280,
+        height:   1024,
+        palette:  [0xFF000000,0xFF0000FF,0xFF00FF00,0xFF00FFFF,0xFFFF0000,0xFFFF00FF,0xFFFFFF00,0xFFFFFFFF]
       }
     ];
 
     this._addCanvas(elementId,scale);
-    this._setMode(1);
+    this._setMode(this.currentMode);
     this._startMessage();
 
     if (globals) {this._globals()}
@@ -58,13 +71,18 @@ class BeebVDU {
     window.RND = this.rnd.bind(this);
     window.GCOL = this.gcol.bind(this);
     window.CLS = this.cls.bind(this);
+    window.COLOR = this.color.bind(this);
     window.POINT = this.point.bind(this);
-    window.ANIMATION = this.animate.bind(this);
+    window.ANIMATE = this.animate.bind(this);
+    window.SGN = function(n){return (n>0) ? Math.floor(n) : 0};
+    window.SIN = Math.sin;
+    window.COS = Math.cos;
+    window.SQR = Math.sqrt;
   }
 
   _addCanvas(elementId,scale){
     this.canvas = document.createElement('canvas');
-    this.canvas.id = "canvas";
+    this.canvas.id = "canvas"+Math.random();
     if (elementId != null) {
       document.getElementById(elementId).appendChild(this.canvas);
     } else {
@@ -78,6 +96,8 @@ class BeebVDU {
   }
 
   _setMode(n){
+    this.currentMode = n;
+    this.canvas = document.getElementById(this.canvas.id);
     let width = this.modes[n].width;
     let height = this.modes[n].height;
     for (let c=0; c<this.paletteLUT.length;c++){
@@ -91,11 +111,13 @@ class BeebVDU {
     this.mode.ratio_y = Math.log2(1024/this.canvas.height);
     this.frame        = this.ctx.createImageData(width,height);
     this.frame32      = new Uint32Array(this.frame.data.buffer);
-    this.cls();
+    this.textCursor   = [0,0];
   }
 
   _toScreenCoordinates(x,y){
-    return [x >> this.mode.ratio_x, y >> this.mode.ratio_y];
+    x = x >> this.mode.ratio_x;
+    y = (1024-y) >> this.mode.ratio_y;
+    return [x,y];
   }
 
   _pushGraphicsCursor(x,y){
@@ -104,6 +126,7 @@ class BeebVDU {
   }
 
   _pixel(x,y,c){
+    if (x<0 || x>=this.canvas.width || y<0 || y>=this.canvas.height) return;
     let offset = x+y*this.canvas.width;
     this.frame32[offset]  = c;
   }
@@ -148,7 +171,7 @@ class BeebVDU {
   }
 
   _startMessage(){
-    this.printtab(1,2,"BBC Micro VDU");
+    this.printtab(1,2,"BBC Micro VDU graphics");
     this.printtab(1,4,"JavaScript library");
     this.printtab(1,6,this.vdu_version);
     this.printtab(1,8,">"); // both BBC BASIC and JavaScript have a chevron prompt, how about that?
@@ -160,13 +183,14 @@ class BeebVDU {
 
   // Public methods based on BBC BASIC keywords
 
+
   print(s){
     let [tx,ty] = this.textCursor;
     for (let i = 0; i < s.length; i++) {
       this._plotChar(s[i],tx*8,ty*8)
       tx+=1;
     }
-    //this.textCursor = [0,ty+1];
+    this.textCursor = [0,ty+1];
   }
 
   move(x,y){
@@ -175,10 +199,15 @@ class BeebVDU {
   }
 
   cls(){
+    this._setMode(this.currentMode);
     this.textCursor = [0,0]
     for (let i=0; i<this.frame32.length;i++){
       this.frame32[i]=0xFF000000;
     }
+  }
+
+  color(c){
+    this.textForeground = this.paletteLUT[c];
   }
 
   draw(x,y){
@@ -204,9 +233,11 @@ class BeebVDU {
   }
 
   point(x,y){
+    [x,y] = this._toScreenCoordinates(x,y);
     this._pushGraphicsCursor(x,y);
     this._pixel(this.graphicsCursor[0],this.graphicsCursor[1],this.graphicsForeground)
   }
+
 }
 
 //export default BeebVDU;
