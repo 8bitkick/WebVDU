@@ -39,13 +39,13 @@ class BeebVDU {
         palette:  [0xFF000000,0xFF0000FF,0xFF00FF00,0xFF00FFFF,0xFFFF0000,0xFFFF00FF,0xFFFFFF00,0xFFFFFFFF]
       },
       {
-        mode:     4,
+        mode:     21,
         width:    640,
         height:   512,
         palette:  [0xFF000000,0xFF0000FF,0xFF00FF00,0xFF00FFFF,0xFFFF0000,0xFFFF00FF,0xFFFFFF00,0xFFFFFFFF]
       },
       {
-        mode:     3,
+        mode:     100,
         width:    1280,
         height:   1024,
         palette:  [0xFF000000,0xFF0000FF,0xFF00FF00,0xFF00FFFF,0xFFFF0000,0xFFFF00FF,0xFFFFFF00,0xFFFFFFFF]
@@ -65,6 +65,7 @@ class BeebVDU {
   _globals() {
     window.PRINT = this.print.bind(this);
     window.PRINTTAB = this.printtab.bind(this);
+    window.PLOT = this.plot.bind(this);
     window.DRAW = this.draw.bind(this);
     window.MOVE = this.move.bind(this);
     window.MODE = this.mode.bind(this);
@@ -72,7 +73,7 @@ class BeebVDU {
     window.GCOL = this.gcol.bind(this);
     window.CLS = this.cls.bind(this);
     window.COLOR = this.color.bind(this);
-    window.POINT = this.point.bind(this);
+    //window.POINT = this.point.bind(this);
     window.ANIMATE = this.animate.bind(this);
     window.SGN = function(n){return (n>0) ? Math.floor(n) : 0};
     window.SIN = Math.sin;
@@ -96,12 +97,13 @@ class BeebVDU {
   }
 
   _setMode(n){
+    let modeSettings = this.modes.find(m => m.mode === n);
     this.currentMode = n;
     this.canvas = document.getElementById(this.canvas.id);
-    let width = this.modes[n].width;
-    let height = this.modes[n].height;
+    let width = modeSettings.width;
+    let height = modeSettings.height;
     for (let c=0; c<this.paletteLUT.length;c++){
-      this.paletteLUT[c] = this.modes[n].palette[c % this.modes[n].palette.length];
+      this.paletteLUT[c] = modeSettings.palette[c % modeSettings.palette.length];
     }
     this.textForeground = this.paletteLUT[7];
     this.textBackground = this.paletteLUT[0];
@@ -112,6 +114,7 @@ class BeebVDU {
     this.frame        = this.ctx.createImageData(width,height);
     this.frame32      = new Uint32Array(this.frame.data.buffer);
     this.textCursor   = [0,0];
+    this.cls();
   }
 
   _toScreenCoordinates(x,y){
@@ -199,7 +202,7 @@ class BeebVDU {
   }
 
   cls(){
-    this._setMode(this.currentMode);
+    //this._setMode(this.currentMode);
     this.textCursor = [0,0]
     for (let i=0; i<this.frame32.length;i++){
       this.frame32[i]=0xFF000000;
@@ -232,11 +235,16 @@ class BeebVDU {
     this._setMode(m);
   }
 
-  point(x,y){
+  plot(p,x,y){
     [x,y] = this._toScreenCoordinates(x,y);
     this._pushGraphicsCursor(x,y);
-    this._pixel(this.graphicsCursor[0],this.graphicsCursor[1],this.graphicsForeground)
+
+    switch (p){
+      case 69:
+      this._pixel(this.graphicsCursor[0],this.graphicsCursor[1],this.graphicsForeground)
+    }
   }
+
 
 }
 
