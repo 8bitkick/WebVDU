@@ -1,10 +1,13 @@
 <html>
 <head>
   <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200&family=Varela+Round&display=swap" rel="stylesheet">
   <style>
   .vdu {
     width: 100%;
-    text-align:center;
+    //text-align:center;
     //background-color: red;
   }
 
@@ -12,21 +15,26 @@
     display: inline;
   }
 
+  *{
+    font-family: 'Varela Round', sans-serif;
+  }
+
 </style>
 <script src='./vdu.js'></script>
 </head>
 <body>
   <header>
-    <h1>Hello, world</h1>
-    <p>Welcome to my website!</p>
+    <h1>VDU-web</h1>
+    <h2 style="color:#ffff00">BBC Micro graphics JavaScript library</h2>
+
 
   </header>
 
   <main>
-    <p>This is my new website and it's using Simple.css. It's really cool. If you want to use it too, you can <a href="https://simplecss.org">visit their site</a>.</p>
+    <h2>Retro pixels fast</h2>
 
+    <p>Create 8-bit graphics with a few lines of JavaScript! A BBC Micro (1981) <a href="https://tobylobster.github.io/mos/mos/S-s5.html">VDU</a> graphics compatible library.</p>
     <div id="hello" class="vdu"></div>
-    <div id="hello2" class="vdu"></div>
     <pre>
       new BeebVDU()
 
@@ -37,89 +45,103 @@
 
       PRINT("Hello world!")</pre>
 
-
-      <p>This is my new website and it's using Simple.css. It's really cool. If you want to use it too, you can <a href="https://simplecss.org">visit their site</a>.</p>
-      <div id="waves" class="vdu"></div>
+      <h2>A time machine for your code</h2>
       <div id="blackhole" class="vdu"></div>
+      <p>Render the same code in different display eras! Choose chunky 80s pixels, finer 90s Acorn Archimedes or smooth modern day resolutions by just adding a <code>MODE</code> command:</p>
       <pre>
         new BeebVDU()
         MODE(0)
         PRINT("Blackhole rules!")
-          for (let X=-25;X<25;X++){
-            for (let Y=-25;Y<25;Y++){
-              let x = 640-15*X-12*Y
-              let y = 512-X+7*Y+50*(-8/SQR(1+(X*X+Y*Y)/5))
-              POINT(x,y)
-            }
-          }</pre>
+        for (let X=-25;X<25;X++){
+          for (let Y=-25;Y<25;Y++){
+            let x = 640-15*X-12*Y
+            let y = 512-X+7*Y+50*(-8/SQR(1+(X*X+Y*Y)/5))
+            PLOT(69,x,y)
+          }
+        }</pre>
+
+
+        <h2>Real-time animation</h2>
+        <div id="waves" class="vdu"></div>
+        <p>Put your animation code in a JavaScript function and web-VDU will draw every animation frame</p>
+        <pre>
+          new BeebVDU()
+          function draw(){
+            MODE(0)
+
+            //...your cool shader JS here
+
+            GCOL(0,color)
+            PLOT(69,x,x)
+          };
+          ANIMATE(draw);
+        </pre>
+
+        <h2>That's a Moire</h2>
+        <p>Build interactions with web-VDU the same as you would with any HTML5 canvas.
+          <div id="drawHello" class="vdu"></div>
+
+
+          <h2>Try it now</h2>
+        <p> You can see 100s of examples of what's possible on the original 1980s BBC Micro on <a href="https://www.bbcmicrobot.com">BBC Micro Bot</a>. </p>
+      </p>
+
+
+
+
     </main>
 
     <footer>
-      <p>Jane Smith's website.</p>
+      <p>8bitkick</p>
     </footer>
   </body>
   <script>
 
   new BeebVDU({id:'hello'})
   MODE(2)
-  for (let x=0;x<200;x++){
+  for (let x=0;x<800;x++){
     GCOL(0,RND(7))
     DRAW(RND(1280),RND(1024))
   }
-  PRINTTAB(3,15,"Hello world!")
 
+  PRINT("Hello world!")
 
-  new BeebVDU({id:'hello2'})
-  MODE(2)
-  for (let x=0;x<10;x++){
-    COLOR(RND(7))
-    PRINT("Hello world!")
+  let vdu7 = new BeebVDU({id:'drawHello'})
+  function drawHello(x,y){
+    vdu7.mode(1)
+    for (let c=0;c<1640;c++){
+      vdu7.gcol(0,(c&3)+1)
+      vdu7.move(x,y)
+      vdu7.draw(640+SIN(c)*1280,512+COS(c)*1024)
+    }
+    vdu7.printtab(16,15,"Web VDU")
+  }
+  drawHello(640,512)
+  vdu7.canvas.addEventListener("pointerdown", getMousePos, false);
+  vdu7.canvas.addEventListener("pointermove", getMousePos, false);
+  function  getMousePos(evt) {
+    var rect = vdu7.canvas.getBoundingClientRect(),
+    scaleX = vdu7.canvas.width / rect.width,
+    scaleY = vdu7.canvas.height / rect.height;
+    let a = {
+      x: (evt.clientX - rect.left) * scaleX,
+      y: (evt.clientY - rect.top) * scaleY
+    }
+    drawHello(a.x*4,1024-a.y*4);
   }
 
 
 
-  let vdu2 = new BeebVDU({id:'waves'})
-  vdu2.mode(2)
-  let c = 0.1;
-  let di = 0.003;
-  function waves(){
-    vdu2.cls();
-    if (c>1 || c<0.1) di=0-di
-    c+=di;
-    //vdu.cls()
-    for (let b=1;b<=1024;b+=4){
-      let p=0, d = [c];
-      for (let a=1;a<=640;a+=4){
-        let x=.5, s=0, t=a/640+2, u=b/512+2;
-        for (let n=0;n<4;n++){
-          x=t*x*(1-x)*c
-          let f=t*(1-2*x)*c
-          x=u*x*(1-x)
-          f=f*u*(1-2*x)
-          x=t*x*(1-x)
-          f=f*t*(1-2*x)
-          x=u*x*(1-x)
-          s=s+(Math.log(Math.abs(f*u*(1-2*x))))
-        }
-        let i=a>>2
-        s=d[i]+p+2-s/12
-        if (s>7) s=7
-        if (s<0) s=0
-        let e=s / 16;
-        p=e*7
-        if (i!=0) d[i-1]=d[i-1]+e*4
-        d[i]=d[i]+e*5
-        d[i+1]=e
-        vdu2.gcol(0,s & 0x7)
-        vdu2.point(a*2,b)
 
 
-        //vdu2._pixel(a,b,this.paletteLUT[s&0x7])
-      }
-      //vdu2.printtab(0,0,c.toString((10)))
-    }
-  };
-  vdu2.animate(waves);
+
+  //   new BeebVDU({id:'hello2'})
+  //   MODE(2)
+  //   for (let x=0;x<10;x++){
+  //   COLOR(RND(7))
+  //   PRINT("Hello world!")
+  // }
+
 
   //
   //
@@ -180,29 +202,76 @@
 
 
   // Blackhole
-
-  new BeebVDU({id:'blackhole',scale:1})
-  MODE(0)
+  let ms = [
+    {mode:2, note:"BBC Micro (160x256)"},
+    {mode:1, note:"BBC Micro (320x256)"},
+    {mode:0, note:"BBC Micro (640x256)"},
+    {mode:21, note:"Acorn Archimedes (640x512)"},
+    {mode:100, note:"Web VDU (1280x1024)"}
+  ];
+  let bh = new BeebVDU({id:'blackhole',scale:1})
   let j = 0;
-  function bh(){
-    let m = Math.floor(j/2) % 5
-    MODE(m);
+  function blackholeFrame(){
+    let m = ms[Math.floor(j/2) % 5].mode;
+    bh.mode(m);
     j+=0.03;
 
     for (let X=-25;X<25;X++){
       for (let Y=-25;Y<25;Y++){
         let x = 640-15*X-12*Y*COS(j)
         let y = 512-X+7*Y+50*(-8/SQR(1+(X*X+Y*Y)/5))
-        POINT(x,y)
+        bh.plot(69,x,y)
       }
     }
-      PRINT("")
-      PRINT("BBC Micro VDU");
-      PRINT("MODE "+m)
+    bh.print("")
+    bh.print(ms[Math.floor(j/2) % 5].note);
+    bh.print("MODE "+m)
   }
-  ANIMATE(bh);
+  bh.animate(blackholeFrame);
 
 
+
+
+  // wave
+  let wave = new BeebVDU({id:'waves'})
+
+
+  function waveAnimation(){
+    wave.mode(1)
+    wave.paletteLUT[1]=0xffff0000;
+    wave.paletteLUT[2]=0xffffff00;
+    let c = Date.now() / 100, o = Math.sin(c/(Math.PI*2*10))*12;
+    //vdu.cls()
+    for (let b=1;b<=1024;b+=4){
+      let p=.4, d = [c];
+      for (let a=1;a<=1280;a+=4){
+        let x=.5, s=o, t=a/640+2, u=b/512+2;
+        for (let n=0;n<3;n++){
+          x=t*x*(1-x)*Math.cos(o/10)
+          let f=t*(1-2*x)
+          x=u*x*(1-x)
+          f=f*u*(1-2*x)
+          x=t*x*(1-x)
+          f=f*t*(1-2*x)
+          x=u*x*(1-x)
+          s=s+(Math.log(Math.abs(f*u*(1-2*x))))
+        }
+        let i=a>>2
+        s=d[i]+p+2-s/12
+        // if (s>7) s=7
+        // if (s<0) s=0
+        let e=(s-Math.floor(s)) / 17
+        p=e*7
+        if (i!=0) d[i-1]=d[i-1]+e*4
+        d[i]=d[i]+e*5
+        d[i+1]=e
+        wave.gcol(0,s & 0x3)
+        wave.plot(69,a,b)
+      }
+      //  vdu.printtab(0,0,c.toString((10)))
+    }
+  };
+  wave.animate(waveAnimation);
 
 
 
