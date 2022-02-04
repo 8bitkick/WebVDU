@@ -1,3 +1,5 @@
+// BBC Micro VDU driver compatible Javascript library for web
+
 
 class WebVDU {
   constructor(params){
