@@ -64,7 +64,7 @@ class WebVDU {
     window.requestAnimationFrame(this._updateFrame.bind(this));
   }
 
-  _globals() {
+  _globals() { // I know it's wrong, but it feels so right
     window.PRINT = this.print.bind(this);
     window.PRINTTAB = this.printtab.bind(this);
     window.PLOT = this.plot.bind(this);
