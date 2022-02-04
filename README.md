@@ -1,6 +1,8 @@
 # Web VDU driver (experimental)
 BBC Micro VDU driver compatible Javascript library for web
 
+See WebVDU in action on the [live demo page](https://www.bbcmicrobot.com/webVDU/index.html)
+
 ## Intro
 Create 8-bit graphics with a few lines of JavaScript! A quick way to prototyping retro graphics, creating documentation, and have fun porting BBC Micro Bot programs to the web.
 
