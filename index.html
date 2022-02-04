@@ -1,0 +1,244 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200&family=Varela+Round&display=swap" rel="stylesheet">
+  <style>
+  .vdu {
+    width: 100%;
+    background-color: black;
+  }
+
+  canvas {
+    display: inline;
+  }
+
+  pre{
+    text-align:left;
+  }
+
+  *{
+    font-family: 'Varela Round', sans-serif;
+    text-align:center;
+  }
+
+</style>
+<script src='https://cdn.jsdelivr.net/gh/8bitkick/WebVDU/WebVDU.js'></script>
+</head>
+<body>
+  <header>
+    <h1>WebVDU</h1>
+    <h2 style="color:#ffff00">Retro graphics JavaScript library</h2>
+
+
+  </header>
+
+  <main>
+    <h2>Chunky pixels fast</h2>
+
+    <p>Create 8-bit retro graphics with a few lines of JavaScript!</p>
+    <p>This demo page uses an experimental implementation of the BBC Micro (1981) <a href="https://tobylobster.github.io/mos/mos/S-s5.html">VDU drivers</a> for JavaScript and HTML5 canvas. </p>
+
+    <p>Go to the <a href="https://github.com/8bitkick/WebVDU">WebVDU GitHub</a> page</p>
+
+    <div id="hello" class="vdu"></div>
+    <pre>
+      new WebVDU()
+
+      for (let x=0;x<800;x++){
+        GCOL(0,RND(7))
+        DRAW(RND(1280),RND(1024))
+      }
+
+      PRINT("Hello world!")</pre>
+
+
+      <h1>&nbsp;</h1>
+
+      <h2>Same code, different eras</h2>
+      <p>Choose chunky 80s pixels, finer 90s Acorn Archimedes or smooth modern day resolutions by just adding a <code>MODE</code> command:</p>
+      <div id="blackhole" class="vdu"></div>
+      <i>Source: @baffinsquid on <a href="https://bbcmic.ro/?experimental=true&#%7B%22v%22:1,%22program%22:%22MO.0:P.%20TAB%285,3%29;%5C%22z=-8/%281+x%5E2+y%5E2%29%20Blackhole%20Rules!%5C%22:V.5%5CnF.X=-25TO24:F.Y=-25TO24:F.U=0TO1:F.V=0TO1:Q=FNP%284+83*U,X+U,Y+V%29:N.,%5CnF.U=0TO2S..5:Q=FNP%284+SGNU,X+%281A.U+.5%29,Y+%281A.U%29%29:N.,,:V.1%5CnDEFFNP%28P,X,Y%29:PL.P,640-15*X-13*Y,512-4*X+7*Y+50*%28-8/SQR%281+%28X*X+Y*Y%29/5%29%29:=0%22,%22author%22:%22baffinsquid%22,%22date%22:1614252261000,%22id%22:%221364899028903854081%22%7D">BBC Micro Bot</a></i>
+      <pre>
+        new WebVDU()
+        MODE(0)
+        PRINT("Blackhole rules!")
+        for (let X=-25;X<25;X++){
+          for (let Y=-25;Y<25;Y++){
+            let x = 640-15*X-12*Y
+            let y = 512-X+7*Y+50*(-8/SQR(1+(X*X+Y*Y)/5))
+            PLOT(69,x,y)
+          }
+        }</pre>
+
+
+        <h1>&nbsp;</h1>
+
+
+        <h2>Real-time animation</h2>
+        <p>Put animation loop code in a function to be called every frame with <code>ANIMATE</code></p>
+        <div id="waves" class="vdu"></div>
+        <i>Source: @monke_child on <a href="https://bbcmic.ro/?experimental=true&#%7B%22v%22:1,%22program%22:%22ë1%5CnREM%20HT%20@monke_child%5Cnñ%5C%22%5Cu0011%C2%82%5Cf%5Cu0013%5Cu0003%5Cu0006%5Cu0000%5Cu0000%5Cu0000%5Cu0013%5Cu0002%5Cu0004%5Cu0000%5Cu0000%5Cu0000%5Cu0013%5Cu0001%5Cu0000%5Cu0000%5Cu0000%5Cu0000%5Cu0013%5Cu0000%5Cu0007%5Cu0000%5Cu0000%5C%22%5CnÞd%28161%29%5Cnãb=1¸1023%C2%884%5Cnp=0%5Cnd%280%29=0%5Cnãa=1¸1279%C2%888%5Cnx=.5%5Cns=0%5Cnt=a/640+2%5Cnu=b/512+2%5Cnãn=1¸3%5Cnx=t*x*%281-x%29%5Cnf=t*%281-2*x%29%5Cnx=u*x*%281-x%29%5Cnf=f*u*%281-2*x%29%5Cnx=t*x*%281-x%29%5Cnf=f*t*%281-2*x%29%5Cnx=u*x*%281-x%29%5Cns=s+ª%28%C2%94%28f*u*%281-2*x%29%29%29%5Cn%C3%AD%5Cni=a%20%C2%818%5Cns=d%28i%29+p+2-s/4%5Cnçs%3E7%C2%8Cs=7%5Cnçs%3C0%C2%8Cs=0%5Cne=%28s-¨%28s%29%29/17%5Cnp=e*7%5Cnçi%20%C2%8Cd%28i-1%29=d%28i-1%29+e*3%5Cnd%28i%29=d%28i%29+e*5%5Cnd%28i+1%29=e%5Cnæ0,s%5Cnð69,a,b%5Cn%C3%AD,%22,%22author%22:%22acornproton%22,%22date%22:1616216977000,%22id%22:%221373139642199937024%22%7D">BBC Micro Bot</a></i>
+
+        <pre>
+          new WebVDU()
+          function draw(){
+            MODE(1)
+
+            //...your cool shader JS here
+
+            GCOL(0,color)
+            PLOT(69,x,x)
+          };
+          ANIMATE(draw);
+        </pre>
+
+        <h1>&nbsp;</h1>
+
+        <h2>That's a Moire</h2>
+        <p>Build interactions with webVDU the same as you would with any HTML5 canvas.
+          <div id="updateVdu" class="vdu"></div>
+
+
+          <h1>&nbsp;</h1>
+
+          <h2>Try it now</h2>
+          <p> You can see 100s of examples of what's possible on the original 1980s BBC Micro on <a href="https://www.bbcmicrobot.com">BBC Micro Bot</a>. </p>
+        </p>    <p>Note <mark>this library is a barebones alpha</mark> with many VDU functions yet to be implemented.</p>
+
+        <p>Go to the <a href="https://github.com/8bitkick/WebVDU">WebVDU GitHub</a> page</p>
+
+        <pre>
+          &lt;html&gt;
+          &lt;script&gt;
+          new WebVDU()
+        </pre>
+
+        <div id="boot" class="vdu"></div>
+      </main>
+
+      <footer>
+        <p>8bitkick</p>
+      </footer>
+    </body>
+    <script>
+
+
+    // 1. Hello world!
+    // -----------
+    // Using global functions for retro feel, though it's naughty.
+    new WebVDU({id:'hello'})
+    MODE(2)
+    for (let x=0;x<800;x++){
+      GCOL(0,RND(7))
+      DRAW(RND(1280),RND(1024))
+    }
+    PRINT("Hello world!")
+
+
+    // 2. Blackhole
+    // ---------
+    // we're not using globals here, instead we refer to the specific VDU instance, vdu2
+
+    // A bit more complicated than code shown on the page because we're cycling through the modes
+    let ms = [
+      {mode:2, note:"BBC Micro (160x256)"},
+      {mode:1, note:"BBC Micro (320x256)"},
+      {mode:0, note:"BBC Micro (640x256)"},
+      {mode:21, note:"Acorn Archimedes (640x512)"},
+      {mode:100, note:"Web VDU (1280x1024)"}
+    ];
+
+    let vdu2 = new WebVDU({id:'blackhole',scale:1})
+    let j = 0;
+    function blackholeFrame(){
+      let m = ms[Math.floor(j/2) % 5].mode;
+      vdu2.mode(m);
+      j+=0.04;
+
+      for (let X=-25;X<25;X++){
+        for (let Y=-25;Y<25;Y++){
+          let x = 640-15*X-12*Y*COS(j)
+          let y = 512-X+7*Y+50*(-8/SQR(1+(X*X+Y*Y)/5))
+          vdu2.plot(69,x,y)
+        }
+      }
+      vdu2.print("")
+      vdu2.print(ms[Math.floor(j/2) % 5].note);
+      vdu2.print("MODE "+m)
+    }
+    vdu2.animate(blackholeFrame);
+
+
+    // 3. Wave
+    // -------
+
+    let vdu3 = new WebVDU({id:'waves'})
+
+    function waveAnimation(){
+      vdu3.mode(1);
+      vdu3.paletteLUT[1]=0xffff0000; // cheating because VDU 19 isn't implemented yet
+      vdu3.paletteLUT[2]=0xffffff00;
+      let c = Date.now() / 20, o = Math.sin(c/(Math.PI*2*10))*12;
+      for (let b=0;b<1024;b+=4){
+        let p=0, d = [c];
+        for (let a=0;a<1270;a+=4){
+          let x=.1, s=o, t=(a-4)/640+2, u=b/512+2;
+          for (let n=0;n<3;n++){
+            x=t*x*(1-x)*Math.cos(o/10)*.5
+            let f=t*(1-2*x)
+            x=u*x*(1-x)
+            f=f*u*(1-2*x)
+            x=t*x*(1-x)
+            f=f*t*(1-2*x)
+            x=u*x*(1-x)
+            s=s+(Math.log(Math.abs(f*u*(1-2*x))))
+          }
+          let i=a>>2
+          s=d[i]+p+2-s/12
+          let e=(s-Math.floor(s)) / 17
+          p=e*7
+          if (i!=0) d[i-1]=d[i-1]+e*4
+          d[i]=d[i]+e*5
+          d[i+1]=e
+          vdu3.gcol(0,s & 0x3)
+          if (a>4) vdu3.plot(69,a,b)
+        }
+      }
+    };
+    vdu3.animate(waveAnimation);   // Animation loop
+
+
+    // Web interaction
+    // ---------------
+    // Using event listeners. NB need to fix scaling it's hardcoded for mode 1 right now
+    let vdu4 = new WebVDU({id:'updateVdu'})
+
+    function updateVdu(x,y){
+      vdu4.mode(1);
+      vdu4.paletteLUT[1]=0xff00ffff;
+      vdu4.paletteLUT[0]=0xffffff00;
+      for (let c=0;c<1640;c++){
+        vdu4.gcol(0,c&1)
+        vdu4.move(x,y)
+        vdu4.draw(640+SIN(c)*1280,512+COS(c)*1024)
+      }
+      vdu4.printtab(16,15,"Hi there")
+    }
+    updateVdu(640,512)
+    vdu4.canvas.addEventListener("pointermove", getMousePos, false);
+    function  getMousePos(evt) {
+      var rect = vdu4.canvas.getBoundingClientRect(),
+      scaleX = vdu4.canvas.width / rect.width,
+      scaleY = vdu4.canvas.height / rect.height;
+      let a = {
+        x: (evt.clientX - rect.left) * scaleX,
+        y: (evt.clientY - rect.top) * scaleY
+      }
+      updateVdu(a.x*4,1024-a.y*4);
+    }
+
+    new WebVDU({id:'boot'});
+    </script>
+    </html>
