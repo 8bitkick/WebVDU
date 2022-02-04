@@ -1,2 +1,2 @@
-# BBC-Micro-VDU
-BBC Micro VDU graphics driver library for web, using vanilla Javascript and HTML5 Canvas
+# Web VDU
+BBC Micro VDU drivers for web, using vanilla Javascript and HTML5 Canvas
