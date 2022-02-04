@@ -29,3 +29,8 @@ Then use the library like this:
 
     PRINT("Hello world!")
   ```
+  
+## Disclaimer
+  
+This library is a barebones alpha with many VDU functions yet to be implemented...
+
